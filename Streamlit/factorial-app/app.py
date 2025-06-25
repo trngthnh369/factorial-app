@@ -1,5 +1,5 @@
 import streamlit as st
-from factorial import factorial
+from factorial import fact
 import os
 
 def load_users():
@@ -20,82 +20,75 @@ def login_page():
     """Trang đăng nhập"""
     st.title("Đăng nhập")
     
-    # Nhập tên đăng nhập và mật khẩu
-    username = st.text_input("Tên đăng nhập")
-    # password = st.text_input("Mật khẩu", type="password")
-
+    # Input username
+    username = st.text_input("Nhập tên người dùng:")
+    
     if st.button("Đăng nhập"):
-        users = load_users()
-        if username in users:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.rerun()
+        if username:
+            users = load_users()
+            if username in users:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.rerun()
+            else:
+                # Nếu user không hợp lệ, hiển thị trang chào hỏi
+                st.session_state.show_greeting = True
+                st.session_state.username = username
+                st.rerun()
         else:
-            #Nếu không có user thì hiển thị thông báo lỗi
-            st.session_state.show_greeting = True
-            st.session_state.username = username
-            st.rerun()
-    else:
-        st.warning("Vui lòng nhập tên đăng nhập để đăng nhập.")
+            st.warning("Vui lòng nhập tên người dùng!")
 
-def factorial_caculator():
-    """Trang tính toán giai thừa"""
-    st.title("Máy tính giai thừa")
+def factorial_calculator():
+    """Trang tính giai thừa"""
+    st.title("Factorial Calculator")
     
     # Hiển thị thông tin user đã đăng nhập
-    if 'username' in st.session_state:
-        st.write(f"Chào mừng, {st.session_state.username}!")
-    else:
-        st.warning("Vui lòng đăng nhập trước khi sử dụng máy tính giai thừa.")
-        return
-    #Nút đăng xuất
+    st.write(f"Xin chào, {st.session_state.username}!")
+    
+    # Nút đăng xuất
     if st.button("Đăng xuất"):
         st.session_state.logged_in = False
         st.session_state.username = ""
         st.rerun()
-        
+    
     st.divider()
     
-    #Chức năng tính giai thừa
-    
-    number = st.number_input("Nhập một số nguyên không âm:", min_value=0, step=1)
+    # Chức năng tính giai thừa
+    number = st.number_input("Nhập vào một số:", 
+                              min_value=0, 
+                              max_value=900)
     
     if st.button("Tính giai thừa"):
-        try:
-            result = factorial(number)
-            st.success(f"Giai thừa của {number} là: {result}")
-        except ValueError as e:
-            st.error(str(e))
-            
+        result = fact(number)
+        st.write(f"Giai thừa của {number} là {result}")
+
 def greeting_page():
-    """Trang chào mừng"""
-    st.title("Chào mừng đến với ứng dụng tính giai thừa!")
+    """Trang chào hỏi cho user không hợp lệ"""
+    st.title("Xin chào!")
     st.write(f"Xin chào {st.session_state.username}!")
     st.write("Bạn không có quyền truy cập vào chức năng tính giai thừa.")
-    st.write("Vui lòng đăng nhập để sử dụng máy tính giai thừa.")
     
-    if st.button("Đăng nhập"):
-        st.session_state.logged_in = False
+    if st.button("Quay lại đăng nhập"):
+        st.session_state.show_greeting = False
         st.session_state.username = ""
         st.rerun()
-        
+
 def main():
-    #Khởi tạo session state
+    # Khởi tạo session state
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
     if 'username' not in st.session_state:
         st.session_state.username = ""
     if 'show_greeting' not in st.session_state:
         st.session_state.show_greeting = False
-        
-    #Điều hướng trang dựa trên trạng thái đăng nhập
+    
+    # Điều hướng trang dựa trên trạng thái đăng nhập
     if st.session_state.logged_in:
-        factorial_caculator()
+        factorial_calculator()
     elif st.session_state.show_greeting:
         greeting_page()
     else:
         login_page()
-        
+
 if __name__ == "__main__":
     main()
-    
